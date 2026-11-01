@@ -158,7 +158,7 @@ export const bio = {
     {
       name: "♪ theme of a shop that sells things you dont want - AZALI",
       intro: "",
-      url: "/songs/theme%20of%20a%20shop%20that%20sells%20things%20you%20dont%20want%20-%20AZALI.webm",
+      url: "/songs/theme%20of%20a%20shop%20that%20sells%20things%20you%20dont%20want%20-%20AZALI.ogg",
       link: "https://youtu.be/mB6YotDQ_ow",
     },
   ] as Song[],
