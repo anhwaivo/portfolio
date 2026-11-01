@@ -98,10 +98,29 @@ The song starts when you click the splash (`nhan vao cho bat ki`). That click is
 treated by the browser as a user gesture, which is why the audio is allowed to
 play — autoplaying before any interaction is blocked by every modern browser.
 
-The track is `loop start` then `loop`, played by a **single** `<audio>` element
-whose `src` is swapped when the first part ends. Keep it that way: a second
-element's `play()` is rejected with `NotAllowedError` because only the element
-the click unlocked has playback permission.
+Every track is played by a **single** `<audio>` element whose `src` is swapped
+when the track changes. Keep it that way: a second element's `play()` is rejected
+with `NotAllowedError` because only the element the click unlocked has playback
+permission.
+
+### Adding songs
+
+Edit the `songs` array in `src/config.ts`. Each entry takes:
+
+| Field | Meaning |
+| --- | --- |
+| `name` | What the player and the dropdown show |
+| `url` | The file to play |
+| `intro` | Optional. Plays once, then `url` loops forever. Leave it out (or empty) and `url` just loops on its own |
+| `link` | Optional. Makes the title a link. Leave it out and the title is plain text |
+
+A song with no `intro` loops from the first second — that works fine. It only
+becomes a two-part track when you give it a separate intro file (that is what
+`Infinite Cat Cafe` does: `loop start` once, then `loop` forever).
+
+Put the audio files in `static/songs/` and URL-encode the filename in `url`
+(spaces become `%20`). The dropdown appears automatically as soon as there is
+more than one song.
 
 ## Editing notes
 
@@ -111,3 +130,7 @@ the click unlocked has playback permission.
 - Avoid regex literals inside the inline `<script>` in `render.ts`. A `/` inside
   a character class (e.g. `[^/]`) ends the literal early and the whole script
   fails to parse. Compare URL segments with string helpers instead.
+- A CSS comment inside the `renderPage` template literal must not contain a
+  backtick — it closes the literal and the build breaks.
+- New styles go in `static/bio-overrides.css`, not `bio.css`. That file is
+  loaded after the compiled Tailwind so it wins, and it is safe to edit.

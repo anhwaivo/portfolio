@@ -18,7 +18,13 @@ export interface Social {
 export interface Song {
   name: string;
   url: string;
+  /**
+   * Plays once before `url` starts looping. Omit it for a song that simply
+   * loops from the beginning — a song without an intro works fine.
+   */
   intro?: string;
+  /** Where the title links to. Omit it and the title is plain text. */
+  link?: string;
 }
 
 export interface CustomLink {
@@ -144,9 +150,16 @@ export const bio = {
   /** The music player. Remove entries (or the whole array) to hide it. */
   songs: [
     {
-      name: "Infinite Cat Cafe",
+      name: "♪ Infinite Cat Cafe - AZALI",
       intro: "/songs/Infinite%20Cat%20Cafe%20(loop%20start).ogg",
       url: "/songs/Infinite%20Cat%20Cafe%20(loop).ogg",
+      link: "https://youtu.be/AUL0AXVQ9c",
+    },
+    {
+      name: "♪ theme of a shop that sells things you dont want - AZALI",
+      intro: "",
+      url: "/songs/theme%20of%20a%20shop%20that%20sells%20things%20you%20dont%20want%20-%20AZALI.webm",
+      link: "https://youtu.be/mB6YotDQ_ow",
     },
   ] as Song[],
   /** Whether audio starts automatically. Browsers usually block this. */

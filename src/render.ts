@@ -46,8 +46,8 @@ function renderSocials(): string {
              aria-label="${esc(s.name)}" title="${esc(s.name)}"
              style="border-color: ${bio.accentcolor}; border-width: ${px(bio.borderWidth)}; border-radius: 9999px; background-color: ${bio.secondarycolor}80; color: ${bio.iconcolor};"
              class="p-2 duration-300 flex hover:brightness-50">${inner}</a>
-          <span class="pointer-events-none absolute top-full mt-1.5 px-4 py-2 opacity-0 group-hover:opacity-100 duration-300 whitespace-nowrap font-semibold text-base"
-                style="border-color: ${bio.accentcolor}; border-width: ${px(bio.borderWidth)}; border-radius: ${bio.borderRadius}rem; background-color: ${bio.secondarycolor}; color: ${bio.textcolor}; box-shadow: 0 4px 12px rgba(0,0,0,0.45);">${esc(s.name)}</span>
+          <span class="pointer-events-none absolute top-full mt-1 px-4 py-1 opacity-0 group-hover:opacity-100 duration-300 whitespace-nowrap font-semibold text-sm"
+                style="border-color: ${bio.accentcolor}; border-width: ${px(bio.borderWidth)}; border-radius: ${bio.borderRadius}rem; background-color: ${bio.secondarycolor}; color: ${bio.textcolor}; box-shadow: 0 3px 9px rgba(0,0,0,0.4);">${esc(s.name)}</span>
         </li>`;
     })
     .join("");
@@ -85,11 +85,32 @@ function renderPresence(p: Presence): string {
 function renderMusic(): string {
   if (!bio.songs.length) return "";
   const song = bio.songs[0];
+  const panelStyle = `border-color: ${bio.accentcolor}; border-width: ${px(bio.borderWidth)}; border-radius: ${bio.borderRadius}rem; background-color: ${bio.primarycolor}${Math.round(bio.opacity * 255).toString(16).padStart(2, "0")}; backdrop-filter: blur(${px(bio.blur)}); border-style: solid;`;
+  // The player is driven entirely from this array; each song may carry an
+  // optional `intro` that plays once before its `url` loops forever.
+  // One JSON array so the inline script can parse it directly. An empty or
+  // missing `intro` means the song loops its `url` from the start.
+  const tracks = JSON.stringify(
+    bio.songs.map((s) => ({
+      name: s.name,
+      intro: s.intro ? s.intro : null,
+      url: s.url,
+      link: s.link ? s.link : null,
+    })),
+  );
   return `
-    <div class="glass-panel music-panel" aria-label="Music player" style="border-color: ${bio.accentcolor}; border-width: ${px(bio.borderWidth)}; border-radius: ${bio.borderRadius}rem; background-color: ${bio.primarycolor}${Math.round(bio.opacity * 255).toString(16).padStart(2, "0")}; backdrop-filter: blur(${px(bio.blur)}); border-style: solid;">
-      <div class="music-volume" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 4V5L7 9H3zm13.5 3a3.5 3.5 0 0 0-2-3.16v6.32a3.5 3.5 0 0 0 2-3.16zm-2-8.87v2.06a7 7 0 0 1 0 13.62v2.06a9 9 0 0 0 0-17.74z"/></svg></div>
-      <div class="music-title">${esc(song.name)}</div>
-      <audio class="music-audio music-loop" preload="metadata" src="${esc(song.intro ?? song.url)}" data-intro-src="${esc(song.intro ?? song.url)}" data-loop-src="${esc(song.url)}"></audio>
+    <div class="glass-panel music-panel" aria-label="Music player" style="${panelStyle}">
+      <div class="music-head">
+        <div class="music-volume" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 4V5L7 9H3zm13.5 3a3.5 3.5 0 0 0-2-3.16v6.32a3.5 3.5 0 0 0 2-3.16zm-2-8.87v2.06a7 7 0 0 1 0 13.62v2.06a9 9 0 0 0 0-17.74z"/></svg></div>
+        <div class="music-title-wrap">
+          <a class="music-title" href="${esc(song.link ?? "#")}" target="_blank" rel="noopener noreferrer">${esc(song.name)}</a>
+          ${bio.songs.length > 1 ? `<button class="music-list-toggle" type="button" aria-label="Choose song" aria-expanded="false"><svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg></button>` : ""}
+        </div>
+      </div>
+      <ul class="music-list" hidden>${bio.songs
+        .map((s, i) => `<li><button type="button" class="music-list-item${i === 0 ? " is-current" : ""}" data-track="${i}">${esc(s.name)}</button></li>`)
+        .join("")}</ul>
+      <audio class="music-audio" preload="metadata" data-tracks='${tracks.replace(/'/g, "&#39;")}'></audio>
       <div class="music-controls">
         <span class="music-time current-time">00:00</span>
         <input class="music-seek" type="range" min="0" max="1000" value="0" aria-label="Seek audio">
@@ -99,7 +120,7 @@ function renderMusic(): string {
           <svg class="music-icon-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
           <svg class="music-icon-pause" viewBox="0 0 24 24"><path d="M7 5h4v14H7zm6 0h4v14h-4z"/></svg>
         </button>
-        <button class="music-skip music-next" type="button" aria-label="Restart track"><svg viewBox="0 0 24 24"><path d="M16 6h2v12h-2zM6 6l8.5 6L6 18z"/></svg></button>
+        <button class="music-skip music-next" type="button" aria-label="Next track"><svg viewBox="0 0 24 24"><path d="M16 6h2v12h-2zM6 6l8.5 6L6 18z"/></svg></button>
       </div>
     </div>`;
 }
@@ -235,7 +256,7 @@ ${renderBackground()}
     <div class="flex flex-col gap-3">
       <div class="profile-card tilt-card" style="border-color: ${bio.accentcolor}; border-width: ${px(bio.borderWidth)}; border-radius: ${bio.borderRadius}rem; background-color: ${bio.primarycolor}${Math.round(bio.opacity * 255).toString(16).padStart(2, "0")}; backdrop-filter: blur(${px(bio.blur)}); border-style: solid;">
         ${renderBanner()}
-        <div class="profile-content main-box" style="border-color: ${bio.accentcolor}; border-width: ${px(bio.borderWidth)}; border-radius: 0 0 ${bio.borderRadius}rem ${bio.borderRadius}rem; background-color: ${bio.primarycolor}${Math.round(bio.opacity * 255).toString(16).padStart(2, "0")}; padding: 1rem;">
+        <div class="profile-content main-box" style="border: 0; border-radius: 0 0 ${bio.borderRadius}rem ${bio.borderRadius}rem; background-color: ${bio.primarycolor}${Math.round(bio.opacity * 255).toString(16).padStart(2, "0")}; padding: 1rem;">
           ${bio.showViews ? `<div class="views flex gap-1 items-center" style="color: ${bio.textcolor};" title="visitors today"><span class="w-4 h-4 block" style="fill: ${bio.iconcolor};">${eyeIcon}</span><p id="view-count">${views}</p></div>` : ""}
           <div class="flex flex-col">
             <div class="my-[-3.2rem] -translate-y-[3.2rem] flex items-center justify-center">
@@ -317,13 +338,24 @@ ${renderBackground()}
     var seek = el.querySelector(".music-seek");
     var current = el.querySelector(".current-time");
     var total = el.querySelector(".total-time");
+    var titleEl = el.querySelector(".music-title");
+    var list = el.querySelector(".music-list");
+    var listToggle = el.querySelector(".music-list-toggle");
     if (!audio || !toggle || !seek) return;
 
-    // Intro plays once, then the main loop repeats forever.
-    var introSrc = audio.getAttribute("data-intro-src") || audio.getAttribute("src");
-    var loopSrc = audio.getAttribute("data-loop-src") || introSrc;
-    var looping = introSrc === loopSrc; // no separate intro: loop from the start
+    var tracks = [];
+    try { tracks = JSON.parse(audio.getAttribute("data-tracks") || "[]"); } catch (e) { tracks = []; }
+    if (!tracks.length) return;
+
+    // Each entry plays its intro once and then its url forever. A track with
+    // no intro simply loops its url from the first second.
+    var index = 0;
+    var introSrc = "";
+    var loopSrc = "";
+    var looping = false;
+    var introDuration = 0;
     var seeking = false;
+
     var clock = function (n) {
       if (!Number.isFinite(n)) return "00:00";
       return String(Math.floor(n / 60)).padStart(2, "0") + ":" + String(Math.floor(n % 60)).padStart(2, "0");
@@ -344,30 +376,83 @@ ${renderBackground()}
     var currentSegment = function () {
       return decodeURI(lastSegment(audio.currentSrc || audio.getAttribute("src")));
     };
-    var isIntro = function () { return currentSegment() === decodeURI(lastSegment(introSrc)); };
-    var isLooping = function () { return currentSegment() === decodeURI(lastSegment(loopSrc)); };
-    // The seek bar covers the intro plus one pass of the loop.
+    var onLoopFile = function () {
+      return Boolean(loopSrc) && currentSegment() === decodeURI(lastSegment(loopSrc));
+    };
+
+    // Point the player at tracks[i] without loading anything yet.
+    var select = function (i) {
+      var t = tracks[i];
+      introSrc = t.intro || t.url;
+      loopSrc = t.url;
+      // No intro (or an intro that IS the loop) means one file repeats forever,
+      // which is the case that used to stop after a single pass.
+      looping = introSrc === loopSrc;
+      introDuration = 0;
+      audio.loop = looping;
+      if (titleEl) {
+        titleEl.textContent = t.name;
+        if (t.link) titleEl.setAttribute("href", t.link);
+        else titleEl.removeAttribute("href");
+      }
+      if (list) {
+        var items = list.querySelectorAll(".music-list-item");
+        for (var n = 0; n < items.length; n++) items[n].classList.toggle("is-current", n === i);
+      }
+    };
+    // Measure the intro so the seek bar can be mapped before the loop loads.
+    var measureIntro = function () {
+      if (looping || !introSrc) { introDuration = 0; return; }
+      var want = introSrc;
+      var m = document.createElement("audio");
+      m.preload = "metadata";
+      m.src = want;
+      m.addEventListener("loadedmetadata", function () {
+        if (introSrc !== want) return;
+        introDuration = Number.isFinite(m.duration) ? m.duration : 0;
+        sync();
+      });
+    };
+    // The seek bar spans the intro plus one pass of the loop.
     var timeline = function () {
-      var introLen = looping || !Number.isFinite(audio.duration) ? 0 : introDuration;
-      return introLen + (Number.isFinite(audio.duration) ? audio.duration : 0);
+      var loopLen = Number.isFinite(audio.duration) ? audio.duration : 0;
+      if (looping) return loopLen;
+      return introDuration + loopLen;
     };
     var sync = function () {
-      var position = (looping ? 0 : introDuration) + audio.currentTime;
+      // audio.currentTime is the offset within whichever file is loaded.
+      var position = looping ? audio.currentTime : (onLoopFile() ? introDuration + audio.currentTime : audio.currentTime);
       if (current) current.textContent = clock(position);
       var duration = timeline();
       if (duration && !seeking && seek) seek.value = String(Math.round(position / duration * 1000));
       if (duration && total) total.textContent = clock(duration);
     };
-    // Duration of the intro is needed to map the seek bar before the loop
-    // track is ever loaded, so measure it once up front.
-    var introDuration = 0;
-    var measure = document.createElement("audio");
-    measure.preload = "metadata";
-    measure.src = introSrc;
-    measure.addEventListener("loadedmetadata", function () {
-      introDuration = measure.duration;
-      if (!looping && audio.currentTime === 0) sync();
-    });
+    // Load the selected track from an offset, optionally starting playback.
+    // The element keeps its gesture authorisation across src swaps, so
+    // playback continues uninterrupted.
+    var load = function (i, startPlaying, at) {
+      index = i;
+      select(i);
+      measureIntro();
+      var target = looping ? loopSrc : introSrc;
+      var apply = function () {
+        audio.removeEventListener("loadedmetadata", apply);
+        var pos = Number.isFinite(at) ? at : 0;
+        if (pos > 0) { try { audio.currentTime = pos; } catch (e) {} }
+        if (startPlaying) {
+          var p = audio.play();
+          if (p && p.catch) p.catch(function () { setButton(false); });
+        }
+        sync();
+      };
+      if (currentSegment() === decodeURI(lastSegment(target))) {
+        apply();
+      } else {
+        audio.src = target;
+        audio.addEventListener("loadedmetadata", apply);
+        audio.load();
+      }
+    };
 
     audio.addEventListener("loadedmetadata", sync);
     audio.addEventListener("durationchange", sync);
@@ -376,39 +461,55 @@ ${renderBackground()}
     audio.addEventListener("pause", function () { setButton(false); });
     audio.addEventListener("ended", function () {
       // The intro finished: switch this same element to the loop and repeat.
-      // Reusing the element is what keeps playback authorised: a second
-      // element's play() would be rejected without its own user gesture.
-      if (looping || isLooping()) return;
-      switchTo(loopSrc, true, 0, true);
+      // Reusing the element is what keeps playback authorised, and setting
+      // audio.loop is what makes the loop actually repeat.
+      if (looping || onLoopFile()) return;
+      looping = true;
+      introDuration = 0;
+      audio.loop = true;
+      audio.src = loopSrc;
+      var apply = function () {
+        audio.removeEventListener("loadedmetadata", apply);
+        var p = audio.play();
+        if (p && p.catch) p.catch(function () {});
+        sync();
+      };
+      audio.addEventListener("loadedmetadata", apply);
+      audio.load();
     });
-    // Swapping src always resets the element, so position and play state have
-    // to be reapplied once the new source reports its metadata.
-    var switchTo = function (src, loopingNow, position, keepPlaying) {
-      looping = loopingNow;
-      audio.loop = loopingNow;
-      if (currentSegment() === decodeURI(lastSegment(src))) {
-        if (Number.isFinite(position)) audio.currentTime = position;
-      } else {
-        audio.src = src;
-        var apply = function () {
-          audio.removeEventListener("loadedmetadata", apply);
-          if (Number.isFinite(position)) {
-            try { audio.currentTime = position; } catch (e) {}
-          }
-          if (keepPlaying) {
-            var resume = audio.play();
-            if (resume && resume.catch) resume.catch(function () { setButton(false); });
-          }
-          sync();
-        };
-        audio.addEventListener("loadedmetadata", apply);
-        audio.load();
-      }
-      sync();
+
+    var toggleList = function (open) {
+      if (!list) return;
+      var next = typeof open === "boolean" ? open : list.hasAttribute("hidden");
+      if (next) list.removeAttribute("hidden"); else list.setAttribute("hidden", "");
+      if (listToggle) listToggle.setAttribute("aria-expanded", next ? "true" : "false");
     };
+    if (listToggle) listToggle.addEventListener("click", function (e) { e.stopPropagation(); toggleList(); });
+    if (list) {
+      var items = list.querySelectorAll(".music-list-item");
+      for (var k = 0; k < items.length; k++) {
+        (function (btn) {
+          btn.addEventListener("click", function () {
+            toggleList(false);
+            // A click is a user gesture, so starting playback here is allowed.
+            load(Number(btn.getAttribute("data-track")) || 0, true, 0);
+          });
+        })(items[k]);
+      }
+      document.addEventListener("click", function (e) {
+        if (list.contains(e.target) || e.target === listToggle) return;
+        toggleList(false);
+      });
+    }
+
+    // Nothing is loaded at render time (the audio tag carries no src), so the
+    // first track is selected here purely to populate the title and duration.
+    select(0);
+    measureIntro();
+    if (!audio.currentSrc) audio.src = looping ? loopSrc : introSrc;
+
     toggle.addEventListener("click", function () {
       if (audio.paused) {
-        if (!Number.isFinite(audio.duration)) audio.load();
         var resume = audio.play();
         if (resume && resume.catch) resume.catch(function () {});
       } else {
@@ -421,35 +522,34 @@ ${renderBackground()}
       if (!duration) return;
       var overall = Number(seek.value) / 1000 * duration;
       var wasPlaying = !audio.paused;
-      if (!looping && overall < introDuration) {
-        audio.currentTime = overall;
+      if (looping) {
+        // One looping file: seek straight into it.
+        try { audio.currentTime = overall; } catch (e) {}
         sync();
-      } else if (looping && overall >= introDuration) {
-        audio.currentTime = overall - introDuration;
-        sync();
+      } else if (overall < introDuration) {
+        if (onLoopFile()) load(index, wasPlaying, overall);
+        else { try { audio.currentTime = overall; } catch (e) {} sync(); }
       } else {
-        // The track has to change; keep playing across the swap.
-        switchTo(looping ? introSrc : loopSrc, !looping ? true : false, overall - introDuration, wasPlaying);
+        // Past the intro: move onto the looping file, keeping the position.
+        looping = true;
+        audio.loop = true;
+        var intoLoop = overall - introDuration;
+        if (onLoopFile()) {
+          try { audio.currentTime = intoLoop; } catch (e) {}
+          sync();
+        } else {
+          load(index, wasPlaying, 0);
+        }
       }
     });
     seek.addEventListener("change", function () { seeking = false; sync(); });
-    el.querySelector(".music-restart")?.addEventListener("click", function () {
-      var wasPlaying = !audio.paused;
-      switchTo(introSrc, false, 0, wasPlaying);
-    });
+    var restart = el.querySelector(".music-restart");
+    if (restart) restart.addEventListener("click", function () { load(index, !audio.paused, 0); });
+    var next = el.querySelector(".music-next");
+    if (next) next.addEventListener("click", function () { load((index + 1) % tracks.length, true, 0); });
     // Starts the song from the beginning. Called from the splash click, which
     // is a real user gesture, so the browser permits the audio to start.
-    autoplayMusic = function () {
-      if (isIntro()) {
-        audio.currentTime = 0;
-        var resume = audio.play();
-        if (resume && resume.catch) resume.catch(function () { setButton(false); });
-      } else {
-        // Already on the loop track: go back to the intro first, then start
-        // playing from there once the intro's metadata is ready.
-        switchTo(introSrc, false, 0, true);
-      }
-    };
+    autoplayMusic = function () { load(index, true, 0); };
   });
 
   // The public Lanyard endpoint provides live presence only after the account

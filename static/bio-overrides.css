@@ -21,7 +21,7 @@
 .socials li > a { display: flex; align-items: center; justify-content: center; width: 50px; height: 50px; padding: 9px; border-style: solid; border-radius: 999px; transition: transform .2s, filter .2s; }
 .socials li > a:hover, .socials li > a:focus-visible { transform: translateY(-2px); filter: brightness(1.2); }
 .socials li > a svg { width: 100%; height: 100%; fill: currentColor; }
-.socials li > span { top: calc(100% + 7px); left: 50%; transform: translate(-50%, -4px); border-style: solid; opacity: 0; transition: opacity .2s, transform .2s; z-index: 20; }
+.socials li > span { top: calc(100% + 5px); left: 50%; transform: translate(-50%, -4px); border-style: solid; opacity: 0; transition: opacity .2s, transform .2s; z-index: 20; font-size: .8rem !important; padding: 4px 10px !important; box-shadow: 0 3px 9px rgba(0,0,0,.4) !important; }
 .socials li:hover > span, .socials li:focus-within > span { opacity: 1; transform: translate(-50%, 0); }
 .discord-panel, .music-panel { display: block; position: relative; gap: 1rem; padding: 1rem; margin-top: .75rem; border-style: solid; color: #fff !important; }
 .discord-panel :is(span, strong, div, a, p) { color: #fff; }
@@ -43,7 +43,24 @@
 .join-arrow { color: #74cdc6; font-size: 1.4rem; line-height: 1; transition: transform .2s; }
 .discord-join:hover .join-arrow { transform: translateX(3px); }
 .music-volume svg { width: 24px; height: 24px; fill: #fff; }
-.music-title { min-width: 0; text-align: center; font-weight: 600; overflow-wrap: anywhere; }
+.music-head { display: flex; align-items: center; gap: .5rem; }
+.music-title-wrap { position: relative; display: flex; align-items: center; justify-content: center; gap: .35rem; flex: 1 1 auto; min-width: 0; }
+.music-title { min-width: 0; text-align: center; font-weight: 600; overflow-wrap: anywhere; color: #fff; text-decoration: none; }
+a.music-title:hover, a.music-title:focus-visible { color: #74cdc6; text-decoration: underline; }
+.music-list-toggle { display: grid; place-items: center; flex: 0 0 auto; width: 26px; height: 26px; padding: 0; border: 0; border-radius: 999px; color: #74cdc6; background: transparent; cursor: pointer; transition: transform .2s; }
+.music-list-toggle[aria-expanded="true"] { transform: rotate(180deg); }
+.music-list-toggle svg { width: 20px; height: 20px; fill: currentColor; }
+.music-list { position: absolute; left: 0; right: 0; top: calc(100% + .4rem); z-index: 30; max-height: 190px; overflow-y: auto; margin: 0; padding: .3rem; list-style: none; border: 2px solid #74cdc6; border-radius: .4rem; background: rgba(16, 16, 19, .96); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); box-shadow: 0 12px 28px rgba(0,0,0,.45); }
+.music-list[hidden] { display: none; }
+/* The music panel's backdrop-filter makes it its own stacking context, which
+   would trap the open dropdown underneath the later discord panel. Lifting the
+   panel itself on open is what lets the dropdown paint over its neighbours. */
+.music-panel:has(.music-list:not([hidden])) { z-index: 40; }
+/* The dropdown is a normal-flow child of the music panel, so it already
+   scrolls the page when it opens; no layout shift is required. */
+.music-list-item { display: block; width: 100%; padding: .45rem .6rem; border: 0; border-radius: .3rem; color: #fff; font-size: .84rem; font-weight: 500; text-align: left; background: transparent; cursor: pointer; transition: background .15s, color .15s; }
+.music-list-item:hover, .music-list-item:focus-visible { background: rgba(116, 205, 198, .18); color: #74cdc6; }
+.music-list-item.is-current { color: #74cdc6; font-weight: 600; background: rgba(116, 205, 198, .12); }
 .music-audio { display: none; }
 .music-panel { min-height: 126px; background-color: rgba(54, 39, 56, .68) !important; -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
 .music-controls { display: grid; grid-template-columns: 40px minmax(40px,1fr) 40px 30px 44px 30px; align-items: center; gap: .45rem; }
