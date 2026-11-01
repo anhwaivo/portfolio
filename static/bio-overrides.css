@@ -1,0 +1,66 @@
+.profile-card, .glass-panel {
+  position: relative;
+  overflow: visible;
+  border-style: solid;
+  border-width: 2px !important;
+  border-color: #74cdc6 !important;
+  color: #fff;
+  background-color: rgba(54, 39, 56, .68) !important;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 14px 34px rgba(0,0,0,.14);
+}
+.discord-panel, .music-panel { transition: transform 180ms ease-out; }
+.profile-card { transform-style: preserve-3d; transition: transform 180ms ease-out; }
+.profile-card > video { border-top-left-radius: .4rem; border-top-right-radius: .4rem; }
+.profile-content { border-style: solid; color: #fff; background-color: transparent !important; }
+.profile-content :is(h1, p, span, a, strong) { color: #fff; }
+.views { position: static; display: flex; align-items: center; gap: .25rem; width: fit-content; margin: 0 0 .5rem .15rem; padding: .3rem .55rem; border-radius: .35rem; background: rgba(9,9,11,.45); z-index: 2; }
+.socials { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 1.5rem; padding: 0; list-style: none; }
+.socials li { position: relative; }
+.socials li > a { display: flex; align-items: center; justify-content: center; width: 50px; height: 50px; padding: 9px; border-style: solid; border-radius: 999px; transition: transform .2s, filter .2s; }
+.socials li > a:hover, .socials li > a:focus-visible { transform: translateY(-2px); filter: brightness(1.2); }
+.socials li > a svg { width: 100%; height: 100%; fill: currentColor; }
+.socials li > span { top: calc(100% + 7px); left: 50%; transform: translate(-50%, -4px); border-style: solid; opacity: 0; transition: opacity .2s, transform .2s; z-index: 20; }
+.socials li:hover > span, .socials li:focus-within > span { opacity: 1; transform: translate(-50%, 0); }
+.discord-panel, .music-panel { display: block; position: relative; gap: 1rem; padding: 1rem; margin-top: .75rem; border-style: solid; color: #fff !important; }
+.discord-panel :is(span, strong, div, a, p) { color: #fff; }
+.music-panel :is(span, div) { color: #fff; }
+.discord-panel { display: flex; align-items: center; justify-content: space-between; min-height: 108px; background-color: rgba(54, 39, 56, .68) !important; -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
+.discord-user { display: flex; align-items: center; gap: .75rem; min-width: 0; }
+.discord-avatar-wrap { position: relative; flex: 0 0 72px; }
+.discord-avatar { width: 72px; height: 72px; border: 2px solid #74cdc6; border-radius: 8px; object-fit: cover; }
+.presence-dot { position: absolute; right: -4px; bottom: -4px; width: 16px; height: 16px; border: 2px solid #756365; border-radius: 50%; background: #80848e; }
+.presence-dot[data-status="online"] { background: #23a55a; }
+.presence-dot[data-status="idle"] { background: #f0b232; }
+.presence-dot[data-status="dnd"] { background: #f23f43; }
+.discord-identity { min-width: 0; }
+.discord-name-row { display: flex; align-items: center; flex-wrap: wrap; gap: .45rem; }
+.discord-badge { display: inline-flex; align-items: center; padding: 0; border-radius: 999px; color: #45ddc0; }
+.discord-badge svg { display: block; width: 24px; height: 24px; }
+.discord-activity { display: block; font-size: .8rem; opacity: .92; }
+.discord-join { display: inline-flex; align-items: center; justify-content: center; gap: .6rem; flex: 0 0 auto; padding: .65rem .8rem; border: 2px solid #74cdc6; border-radius: .4rem; color: #fff !important; font-weight: 600; font-size: .85rem; text-decoration: none; }
+.join-arrow { color: #74cdc6; font-size: 1.4rem; line-height: 1; transition: transform .2s; }
+.discord-join:hover .join-arrow { transform: translateX(3px); }
+.music-volume svg { width: 24px; height: 24px; fill: #fff; }
+.music-title { min-width: 0; text-align: center; font-weight: 600; overflow-wrap: anywhere; }
+.music-audio { display: none; }
+.music-panel { min-height: 126px; background-color: rgba(54, 39, 56, .68) !important; -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
+.music-controls { display: grid; grid-template-columns: 40px minmax(40px,1fr) 40px 30px 44px 30px; align-items: center; gap: .45rem; }
+.music-time { text-align: center; color: #fff !important; font-size: .78rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+.music-seek { width: 100%; height: 5px; margin: 0; accent-color: #74cdc6; cursor: pointer; }
+.music-toggle, .music-skip { display: grid; place-items: center; border: 0; color: #74cdc6; background: transparent; cursor: pointer; }
+.music-toggle { width: 42px; height: 42px; border-radius: 50%; background: #74cdc6; color: #101013; }
+.music-toggle svg { width: 24px; height: 24px; fill: currentColor; }
+.music-skip svg { width: 24px; height: 24px; fill: currentColor; }
+.music-icon-pause { display: none; }
+.music-toggle[aria-pressed="true"] .music-icon-play { display: none; }
+.music-toggle[aria-pressed="true"] .music-icon-pause { display: block; }
+.music-toggle:focus-visible, .music-skip:focus-visible, .discord-join:focus-visible, .socials a:focus-visible { outline: 2px solid white; outline-offset: 3px; }
+@media (max-width: 520px) {
+  .discord-panel { align-items: stretch; flex-direction: column; }
+  .discord-join { width: 100%; }
+  .music-panel { padding: .75rem; }
+  .music-controls { grid-template-columns: 34px minmax(30px,1fr) 34px 24px 38px 24px; gap: .25rem; }
+}
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; } }

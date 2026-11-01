@@ -1,0 +1,23 @@
+{
+  // Deployed Worker name — also the *.workers.dev subdomain.
+  "name": "anhwaivo-bio",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-30",
+
+  // Everything in static/ is served as-is, and takes precedence over nothing:
+  // the Worker's fetch handler runs first for the routes it owns.
+  "assets": {
+    "directory": "static",
+    "binding": "ASSETS",
+    "not_found_handling": "none"
+  },
+
+  // Persistent view counter + over-the-air presence updates.
+  "kv_namespaces": [
+    { "binding": "BIO", "id": "a619b46c211f48f9b11464cefa3cdb6f" }
+  ],
+
+  "observability": {
+    "enabled": true
+  }
+}
