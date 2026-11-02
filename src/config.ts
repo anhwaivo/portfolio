@@ -161,6 +161,12 @@ export const bio = {
       url: "/songs/theme%20of%20a%20shop%20that%20sells%20things%20you%20dont%20want%20-%20AZALI.ogg",
       link: "https://youtu.be/mB6YotDQ_ow",
     },
+    {
+      name: "♪ earth - Flups",
+      intro: "",
+      url: "/songs/earth%20-%20Flups.opus",
+      link: "https://youtu.be/MQdL6XnqdHQ",
+    },
   ] as Song[],
   /** Whether audio starts automatically. Browsers usually block this. */
   useBackgroundAudio: false,
