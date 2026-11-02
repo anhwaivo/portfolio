@@ -47,10 +47,20 @@ npm run check        # typecheck
 
 ## Deploy
 
+This repo is connected to Cloudflare, so **pushing to `main` deploys it**.
+There is nothing else to run:
+
 ```sh
-npx wrangler login   # once
-npm run deploy
+git add -A
+git commit -m "what changed"
+git push
 ```
+
+Cloudflare installs the dependencies and builds the Worker from the repo.
+Watch the build in the Cloudflare dashboard, then reload the live site.
+
+`npm run deploy` still exists and works, but it is not needed — and running it
+alongside the Git build just adds a second deploy source for the same code.
 
 ## Live site
 
