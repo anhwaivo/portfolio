@@ -177,7 +177,7 @@ export const bio = {
     { name: "YouTube", url: "https://www.youtube.com/channel/UClIbG40fLbY1isw5VKUPlIw" },
     { name: "Steam", url: "https://steamcommunity.com/profiles/76561199442973255/" },
     { name: "osu!", url: "https://osu.ppy.sh/users/35952399" },
-    { name: "Email", url: "anhwaivo@duck.com" },
+    { name: "Email", url: "anhwaivo@proton.me" },
   ] as Social[],
 
   customLinks: [] as CustomLink[],

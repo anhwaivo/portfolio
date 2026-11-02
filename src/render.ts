@@ -25,8 +25,12 @@ const px = (n: number) => `${n}px`;
  * e-z.bio config stored the Email entry). Turn a bare address into a mailto:
  * link; leave everything else alone.
  */
-const href = (url: string) =>
-  /^[^/:\s]+@[^/:\s]+\.[^/:\s]+$/.test(url) ? `mailto:${url}` : url;
+/**
+ * An email address is not a link: clicking that social copies the address to
+ * the clipboard instead of opening a mail client. Anything that already looks
+ * like a URL is left alone.
+ */
+const isEmail = (url: string) => /^[^/:\s]+@[^/:\s]+\.[^/:\s]+$/.test(url);
 
 export interface RenderOptions {
   views: number;
@@ -40,13 +44,19 @@ function renderSocials(): string {
       const inner = icon
         ? `<span class="h-7 w-7 block" style="filter: drop-shadow(${bio.iconcolor} 0px 0px 3.5px);">${icon}</span>`
         : `<span class="text-sm font-semibold px-1">${esc(s.name)}</span>`;
+      const style = `border-color: ${bio.accentcolor}; border-width: ${px(bio.borderWidth)}; border-radius: 9999px; background-color: ${bio.secondarycolor}80; color: ${bio.iconcolor};`;
+      // Email copies to the clipboard; everything else opens in a new tab.
+      const control = isEmail(s.url)
+        ? `<button type="button" class="social-copy p-2 duration-300 flex hover:brightness-50"
+             aria-label="Copy ${esc(s.url)}" title="Copy email"
+             data-copy="${esc(s.url)}" style="${style}">${inner}</button>`
+        : `<a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer"
+             aria-label="${esc(s.name)}" title="${esc(s.name)}"
+             class="p-2 duration-300 flex hover:brightness-50" style="${style}">${inner}</a>`;
       return `
         <li class="group flex flex-col items-center relative">
-          <a href="${esc(href(s.url))}" target="_blank" rel="noopener noreferrer"
-             aria-label="${esc(s.name)}" title="${esc(s.name)}"
-             style="border-color: ${bio.accentcolor}; border-width: ${px(bio.borderWidth)}; border-radius: 9999px; background-color: ${bio.secondarycolor}80; color: ${bio.iconcolor};"
-             class="p-2 duration-300 flex hover:brightness-50">${inner}</a>
-          <span class="pointer-events-none absolute top-full mt-1 px-4 py-1 opacity-0 group-hover:opacity-100 duration-300 whitespace-nowrap font-semibold text-sm"
+          ${control}
+          <span class="social-tip pointer-events-none absolute top-full mt-1 px-4 py-1 opacity-0 group-hover:opacity-100 duration-300 whitespace-nowrap font-semibold text-sm"
                 style="border-color: ${bio.accentcolor}; border-width: ${px(bio.borderWidth)}; border-radius: ${bio.borderRadius}rem; background-color: ${bio.secondarycolor}; color: ${bio.textcolor}; box-shadow: 0 3px 9px rgba(0,0,0,0.4);">${esc(s.name)}</span>
         </li>`;
     })
@@ -130,7 +140,7 @@ function renderCustomLinks(): string {
   return `<ul class="flex flex-col gap-2">${bio.customLinks
     .map(
       (l) =>
-        `<li><a href="${esc(href(l.url))}" target="_blank" rel="noopener noreferrer" class="block p-2 text-center font-semibold duration-300 hover:brightness-125" style="border-color: ${bio.accentcolor}; border-width: ${px(
+        `<li><a href="${esc(l.url)}" target="_blank" rel="noopener noreferrer" class="block p-2 text-center font-semibold duration-300 hover:brightness-125" style="border-color: ${bio.accentcolor}; border-width: ${px(
           bio.borderWidth,
         )}; border-radius: ${bio.borderRadius}rem; background-color: ${bio.secondarycolor}80; color: ${bio.textcolor};">${esc(
           l.name,
@@ -604,6 +614,49 @@ ${renderBackground()}
       });
       card.addEventListener("pointerleave", function () {
         card.style.transform = "perspective(1000px) rotateX(0deg) rotateY(0deg)";
+      });
+    });
+
+    // The email social copies the address rather than opening a mail client.
+    document.querySelectorAll(".social-copy").forEach(function (button) {
+      button.addEventListener("click", function () {
+        var value = button.getAttribute("data-copy") || "";
+        var label = button.parentNode ? button.parentNode.querySelector(".social-tip") : null;
+        var done = function () {
+          if (!label) return;
+          // Remember the real name once, so repeated clicks still restore it.
+          if (!label.getAttribute("data-original")) label.setAttribute("data-original", label.textContent);
+          label.textContent = "Copied!";
+          label.style.opacity = "1";
+          clearTimeout(button._copyTimer);
+          button._copyTimer = setTimeout(function () {
+            label.textContent = label.getAttribute("data-original");
+            label.style.opacity = "";
+          }, 1400);
+        };
+        // navigator.clipboard needs a secure context and can still reject, so
+        // fall back to a hidden textarea and execCommand.
+        var fallback = function () {
+          try {
+            var field = document.createElement("textarea");
+            field.value = value;
+            field.setAttribute("readonly", "");
+            field.style.position = "fixed";
+            field.style.opacity = "0";
+            document.body.appendChild(field);
+            field.select();
+            document.execCommand("copy");
+            document.body.removeChild(field);
+            done();
+          } catch (error) {
+            if (label) label.textContent = "Press Ctrl+C";
+          }
+        };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(value).then(done, fallback);
+        } else {
+          fallback();
+        }
       });
     });
 })();
